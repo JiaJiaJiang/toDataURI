@@ -1,0 +1,89 @@
+<title>toDataURI</title>
+
+<h1>toDataURI</h1>
+此小工具用于把文件或文本转换为DataURI
+
+<br>
+<br>
+<form>
+<h3>模式</h3>
+<label for="mode">文本</label> <input type="checkBox" name="mode" id="mode"> <label for="mode">文件</label>
+<br>
+<br>
+<h3>内容</h3>
+<textarea name="textContent"></textarea>
+<input type="file" name="fileContent">
+
+<h3>设置</h3>
+自定义MIME <input type="text" name="mime" placeholder="自动">
+<br>
+<br>
+<button name="submit">转换</button>
+
+<textarea name="result"></textarea>
+</form>
+
+
+<style>
+label{
+	cursor: pointer;
+}
+*[name*=Content]{
+	height: 8em;
+	width: 100%;
+	max-width: 100%;
+}
+input[name=fileContent]{
+	border: 1px solid #ccc;
+}
+[name=result]{
+	height: 20em;
+	width: 100%;
+	max-width: 100%;
+}
+</style>
+<script>
+function $_$(s) {
+	return document.querySelector(s);
+}
+function $__$(s) {
+	return document.querySelectorAll(s);
+}
+
+var modeInput=$_$('input[name=mode]'),
+	textContent=$_$('textarea[name=textContent]'),
+	fileContent=$_$('input[name=fileContent]'),
+	form=$_$('form');
+
+fileContent.hidden=true;
+form.addEventListener('submit',function(e){
+	e.preventDefault();
+	if(modeInput.checked){//文件模式
+		var file=form.fileContent.files[0];
+		var reader=new FileReader();
+		reader.onload=function(e){
+			var mime=form.mime.value;
+			if(mime){
+				form.result.value=e.target.result.replace(/^data\:(.*)\;/,'data:'+mime+';');
+				return;
+			}
+			form.result.value=e.target.result;
+		};
+		reader.readAsDataURL(file);
+	}else{//文本模式
+		var text=Base64.encode(form.textContent.value);
+		var mime=form.mime.value;
+		form.result.value='data:'+(mime?mime:'text/plain')+';base64,'+text;
+	}
+});
+
+modeInput.addEventListener('change',function(e){
+	if(modeInput.checked){
+		fileContent.hidden=!(textContent.hidden=true);
+	}else{
+		fileContent.hidden=!(textContent.hidden=false);
+	}
+});
+(function(global){'use strict';var log=function(){},padding='=',chrTable='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',binTable=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,62,-1,-1,-1,63,52,53,54,55,56,57,58,59,60,61,-1,-1,-1,0,-1,-1,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,-1,-1,-1,-1,-1,-1,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,-1,-1,-1,-1,-1];if(global.console&&global.console.log){log=function(message){global.console.log(message)}}function utf8Encode(str){var bytes=[],offset=0,length,char;str=encodeURI(str);length=str.length;while(offset<length){char=str[offset];offset+=1;if('%'!==char){bytes.push(char.charCodeAt(0))}else{char=str[offset]+str[offset+1];bytes.push(parseInt(char,16));offset+=2}}return bytes}function utf8Decode(bytes){var chars=[],offset=0,length=bytes.length,c,c2,c3;while(offset<length){c=bytes[offset];c2=bytes[offset+1];c3=bytes[offset+2];if(128>c){chars.push(String.fromCharCode(c));offset+=1}else if(191<c&&c<224){chars.push(String.fromCharCode(((c&31)<<6)|(c2&63)));offset+=2}else{chars.push(String.fromCharCode(((c&15)<<12)|((c2&63)<<6)|(c3&63)));offset+=3}}return chars.join('')}function encode(str){var result='',bytes=utf8Encode(str),length=bytes.length,i;for(i=0;i<(length-2);i+=3){result+=chrTable[bytes[i]>>2];result+=chrTable[((bytes[i]&0x03)<<4)+(bytes[i+1]>>4)];result+=chrTable[((bytes[i+1]&0x0f)<<2)+(bytes[i+2]>>6)];result+=chrTable[bytes[i+2]&0x3f]}if(length%3){i=length-(length%3);result+=chrTable[bytes[i]>>2];if((length%3)===2){result+=chrTable[((bytes[i]&0x03)<<4)+(bytes[i+1]>>4)];result+=chrTable[(bytes[i+1]&0x0f)<<2];result+=padding}else{result+=chrTable[(bytes[i]&0x03)<<4];result+=padding+padding}}return result}function decode(data){var value,code,idx=0,bytes=[],leftbits=0,leftdata=0;for(idx=0;idx<data.length;idx++){code=data.charCodeAt(idx);value=binTable[code&0x7F];if(-1===value){log('WARN: Illegal characters (code='+code+') in position '+idx)}else{leftdata=(leftdata<<6)|value;leftbits+=6;if(leftbits>=8){leftbits-=8;if(padding!==data.charAt(idx)){bytes.push((leftdata>>leftbits)&0xFF)}leftdata&=(1<<leftbits)-1}}}if(leftbits){log('ERROR: Corrupted base64 string');return null}return utf8Decode(bytes)}global.Base64={encode:encode,decode:decode}}(window));
+
+</script>
